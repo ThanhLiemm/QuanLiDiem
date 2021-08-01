@@ -174,7 +174,7 @@ int delete_maSV(NodeSVPtr firstSV, string maSV) {
 
 //----------------------- Lop -------------------//
 //kiem tra co rong khong 
-int empty(ListLop list) {
+int empty(ListLop &list) {
 	return list.n == 0;
 }
 //kiem tra xem danh sach da day chua;
@@ -193,7 +193,8 @@ int insert_Lop(ListLop &list, int i, Lop lop) {
 		if (i == 0) i = 1;
 		for (j = list.n - 1; j >= i - 1; j--)
 			list.dSLop[j + 1] = list.dSLop[j];
-		*list.dSLop[i - 1] = lop;
+		list.dSLop[i - 1] = lop;
+		list.n++;
 	}
 	return 1;
 }
@@ -203,7 +204,7 @@ int delete_Lop(ListLop &list, int i) {
 	if (i<0 || i>list.n || list.n == 0) return 0;
 	if (i == 0) i = 1;
 	for (j = 1; j < list.n; j++)
-		list.dSLop[j - 1] = list.dSLop[j];
+		*list.dSLop[j - 1] = list.dSLop[j];
 	list.n--;
 }
 // tim kiem thong tin lop thong qua ma lop
@@ -235,7 +236,7 @@ int update_Lop(ListLop list, Lop lop) {
 	LopPtr oldLop = search_MaLop(list, lop.maLop);
 	if (&lop == NULL) return 0;
 	*oldLop = lop;
-	return 0;
+	return 1;
 }
 
 //----------------------- MonHoc -------------------//
@@ -247,24 +248,16 @@ void Initialize(MonHocPtr &tree) {
 MonHocPtr SearchMH(MonHocPtr &root, string maMH) {
 	MonHocPtr p;
 	p = root;
-	//while (p != NULL) {
-	//	if (strcmp(p->mh.maMH, maMH) == 0) {
-	//		return p;
-	//	}
-	//	if (strcmp(p->mh.Mamh, maMH) == 1) {
-	//		p = p->pLeft;
-	//	}
-	//	else {
-	//		p = p->pRight;
-	//	}
-	//}
-	// hk biet dung y hk?
 	while (p != NULL) {
-		if (p->mh.maMH == maMH) return p;
-		if (p->mh.maMH.length() > maMH.length())
+		if (strcmp(p->mh.maMH, maMH) == 0) {
+			return p;
+		}
+		if (strcmp(p->mh.maMH, maMH) == 1) {
 			p = p->pLeft;
-		else
+		}
+		else {
 			p = p->pRight;
+		}
 	}
 	return NULL;
 }
@@ -278,13 +271,13 @@ MonHocPtr InsertMH(MonHocPtr &tree, MonHoc &mh) {
 		return tree;
 
 	}
-	//if (strcmp(mh.Mamh, tree->mh.Mamh) == -1) {
-	//	InsertMH(tree->pLeft, mh);
-	//}
-	//else if (strcmp(mh.Mamh, tree->mh.Mamh) == 1) {
-	//	InsertMH(tree->pRight, mh);
-	//}
-	//return tree;
+	if (strcmp(mh.maMH, tree->mh.maMH) == -1) {
+		InsertMH(tree->pLeft, mh);
+	}
+	else if (strcmp(mh.maMH, tree->mh.maMH) == 1) {
+		InsertMH(tree->pRight, mh);
+	}
+	return tree;
 }
 // xoa
 MonHocPtr rp;
@@ -324,3 +317,13 @@ int XoaMonhoc(MonHocPtr &tree, string maMH) {
 		return 1;
 	}
 }
+
+// update mon hoc
+int updateMonhoc(MonHocPtr &tree,MonHoc mh){
+	MonHocPtr mhPtr = SearchMH(tree,mh.maMH);
+	if(mhPtr == NULL) return 0;
+	mhPtr.mh = mh;
+	return 1;
+}
+
+
