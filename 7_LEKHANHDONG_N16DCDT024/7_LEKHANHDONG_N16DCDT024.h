@@ -57,7 +57,7 @@ typedef struct MonHoc {
 	string maMH;
 	string tenMH;
 	int soTCLT;
-	int soLCTH;
+	int soTCTH;
 };
 
 typedef struct NodeMonHoc {
@@ -136,11 +136,20 @@ MonHocPtr SearchMH(MonHocPtr &root, string maMH);
 // insert mon hoc
 MonHocPtr InsertMH(MonHocPtr &tree, MonHoc &mh);
 // xoa
-void Xoanode2con(MonHocPtr &k);
-int XoaMonhoc(MonHocPtr &tree,string maMH);
+void NodeThe(MonHocPtr &X, MonHocPtr &Y);
+int XoaMonhoc(MonHocPtr &t, string maMH);
 
 
+/////////Xu ly///////////
+// ----- Mon hoc --------- //
 
+int xuLyThemMonhoc(MonHocPtr &tree);
+
+int xuLyXoaMonhoc(MonHocPtr &tree);
+
+int xuLyHieuChinhMonhoc(MonHocPtr &tree);
+
+void IndsMonhoc(MonHocPtr tree);
 
 
 

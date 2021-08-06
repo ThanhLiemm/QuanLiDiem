@@ -59,7 +59,7 @@ int menuLOP() {
 	}
 }
 // phan monhoc
-int menuMonHoc() {
+int menuMonHoc(MonHocPtr &tree) {
 	system("cls");
 	char MenuMH[][100] = { "\t\|--------------------------|Quan Ly Mon Hoc|-----------------------------|ESC-thoat|",
 						"\t\|\t\t\        Xem danh sach Mon Hoc                                     |",
@@ -110,14 +110,62 @@ int menuMonHoc() {
 	}
 	case 2:
 	{
-		//				NhapDSMH();
+		system("cls");
+		cout << " Danh Sach Mon Hoc" << endl;
+		IndsMonhoc(tree);
+		cout << "ESC de thoat " << endl;
+		char ch = _getch();
+		if (ch == 27) return 1;
+		break;
+
+	}
+	case 3:
+	{
+		system("cls");
+		xuLyThemMonhoc(tree);
+		break;
+	}
+
+	case 4:
+	{
+		while (1) {
+			system("cls");
+			int check = xuLyXoaMonhoc(tree);
+			if (check == 1) {
+				cout << " Xoa thanh cong" << endl;
+			}
+			else {
+				cout << " khong tim thay"<<endl;
+			}
+			cout << "ESC de thoat -  an phim bat ki de tiep tuc" << endl;
+			char ch = _getch();
+			if (ch == 27) return 1;
+		}
+		break;
+	}
+
+	case 5:
+	{
+		while (1) {
+			system("cls");
+			int check = xuLyHieuChinhMonhoc(tree);
+			if (check == 1) {
+				cout << " Hieu chinh thanh cong" << endl;
+			}
+			else {
+				cout << " khong tim thay" << endl;
+			}
+			cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
+			char ch = _getch();
+			if (ch == 27) return 1;
+		}
 		break;
 	}
 
 	}
 }
 // menu chinh
-int menuChinh() {
+void menuChinh(MonHocPtr &tree) {
 	system("cls");
 	char MenuChinh[][1000] = { "\t\|-----------------------------------|QUAN LI DIEM SINH VIEN|----------------------------------|ESC-thoat| ",
 						"\t\|\t\t\t\t\        Quan ly lop                                           |",
@@ -166,14 +214,17 @@ int menuChinh() {
 	switch (i) {
 	case 2:
 	{
+		
 		menuLOP();
 		break;
 	}
 
 	case 3:
 	{
-		menuMonHoc();
-		break;
+		while (true) {
+			int kt = menuMonHoc(tree);
+			if (kt == 2) return;
+		}
 	}
 	}
 }

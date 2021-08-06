@@ -1,4 +1,4 @@
-#include "7_LEKHANHDONG_N16DCDT024.h"
+﻿#include "7_LEKHANHDONG_N16DCDT024.h"
 
 //-----------------------diem -------------------//
 //khoi tao 
@@ -174,7 +174,7 @@ int delete_maSV(NodeSVPtr firstSV, string maSV) {
 
 //----------------------- Lop -------------------//
 //kiem tra co rong khong 
-int empty(ListLop &list) {
+int empty(ListLop list) {
 	return list.n == 0;
 }
 //kiem tra xem danh sach da day chua;
@@ -193,7 +193,7 @@ int insert_Lop(ListLop &list, int i, Lop lop) {
 		if (i == 0) i = 1;
 		for (j = list.n - 1; j >= i - 1; j--)
 			list.dSLop[j + 1] = list.dSLop[j];
-		list.dSLop[i - 1] = lop;
+		*list.dSLop[i - 1] = lop;
 		list.n++;
 	}
 	return 1;
@@ -204,7 +204,7 @@ int delete_Lop(ListLop &list, int i) {
 	if (i<0 || i>list.n || list.n == 0) return 0;
 	if (i == 0) i = 1;
 	for (j = 1; j < list.n; j++)
-		*list.dSLop[j - 1] = list.dSLop[j];
+		list.dSLop[j - 1] = list.dSLop[j];
 	list.n--;
 }
 // tim kiem thong tin lop thong qua ma lop
@@ -249,10 +249,10 @@ MonHocPtr SearchMH(MonHocPtr &root, string maMH) {
 	MonHocPtr p;
 	p = root;
 	while (p != NULL) {
-		if (strcmp(p->mh.maMH, maMH) == 0) {
+		if (p->mh.maMH == maMH) {
 			return p;
 		}
-		if (strcmp(p->mh.maMH, maMH) == 1) {
+		if (p->mh.maMH > maMH) {
 			p = p->pLeft;
 		}
 		else {
@@ -264,6 +264,7 @@ MonHocPtr SearchMH(MonHocPtr &root, string maMH) {
 // insert mon hoc
 MonHocPtr InsertMH(MonHocPtr &tree, MonHoc &mh) {
 	if (tree == NULL) {
+		
 		MonHocPtr p = new NodeMonHoc();
 		p->pLeft = p->pRight = NULL;
 		p->mh = mh;
@@ -271,59 +272,271 @@ MonHocPtr InsertMH(MonHocPtr &tree, MonHoc &mh) {
 		return tree;
 
 	}
-	if (strcmp(mh.maMH, tree->mh.maMH) == -1) {
+	if (mh.maMH < tree->mh.maMH) {
 		InsertMH(tree->pLeft, mh);
 	}
-	else if (strcmp(mh.maMH, tree->mh.maMH) == 1) {
+	else if (mh.maMH > tree->mh.maMH) {
 		InsertMH(tree->pRight, mh);
 	}
 	return tree;
-}
-// xoa
-MonHocPtr rp;
-void Xoanode2con(MonHocPtr &k) {
-
-	if (k->pLeft != NULL) {
-		Xoanode2con(k->pLeft);
-		//r la nut cuc trai cua cay con ben phai, nut goc la rp
-	}
-	else {
-
-		rp->mh = k->mh;
-		rp = k;
-		k = rp->pRight;
-
-	}
-}
-int XoaMonhoc(MonHocPtr &tree, string maMH) {
-	MonHocPtr p = SearchMH(tree, maMH);
-	if (p == NULL) {
-		return 0;
-	}
-	else {
-		rp = p;
-		if (rp->pRight == NULL) {
-			// p la nut la hoac la nut chi co cay con ben trai
-			p = rp->pLeft;
-		}
-		else if (rp->pLeft == NULL) {
-			// p la nut co cay con ben phai
-			p = rp->pRight;
-		}
-		else {
-			Xoanode2con(rp->pRight);
-		}
-		delete rp;
-		return 1;
-	}
 }
 
 // update mon hoc
 int updateMonhoc(MonHocPtr &tree,MonHoc mh){
 	MonHocPtr mhPtr = SearchMH(tree,mh.maMH);
 	if(mhPtr == NULL) return 0;
-	mhPtr.mh = mh;
+		//mhPtr.mh = mh;
 	return 1;
 }
 
 
+// xoa 
+void NodeThe(MonHocPtr &X, MonHocPtr &Y)
+{
+	if (Y->pLeft != NULL)
+	{
+		NodeThe(X, Y->pLeft);
+	}
+	else 
+	{
+		X->mh.maMH = Y->mh.maMH; 
+		X = Y; 
+		Y = Y->pRight; 
+	}
+}
+
+int XoaMonhoc(MonHocPtr &t, string maMH)
+{
+	if (t == NULL)
+	{
+		return 0; 
+	}
+	else
+	{
+		if (maMH < t->mh.maMH)
+		{
+			XoaMonhoc(t->pLeft, maMH);
+		}
+		else if (maMH > t->mh.maMH)
+		{
+			XoaMonhoc(t->pRight, maMH);
+		}
+		else 
+		{
+			MonHocPtr X = t;
+			if (t->pLeft == NULL)
+			{
+				t = t->pRight;
+			}
+			else if (t->pRight == NULL)
+			{
+				t = t->pLeft;
+			}
+			else 
+			{
+				NodeThe(X, t->pRight);
+			}
+			delete X; 
+			return 1;
+		}
+	}
+}
+
+
+////////////////// xu ly ///////////////////////////
+
+///////////// mon hoc //////////////////////
+
+int xuLyThemMonhoc(MonHocPtr &tree) {
+	MonHoc mh;
+	while (1) {
+		cout << "Nhap ma mon hoc : ";
+		cin >> mh.maMH;
+		if (SearchMH(tree, mh.maMH) != NULL) {
+			cout << "ma mon hoc da ton tai ! nhap lai"<<endl;
+			continue;
+		}
+		cout << "Nhap ten mon hoc : ";
+		cin >> mh.tenMH;
+		cout << "Nhap so tin chi ly thuyet : ";
+		cin >> mh.soTCLT;
+		cout << "Nhap so tin chi thuc hanh : ";
+		cin >> mh.soTCTH;
+		cout << "check - " + mh.soTCLT;
+		
+		// SAVE
+		InsertMH(tree, mh);
+		return 1;
+	}
+}
+
+int xuLyXoaMonhoc(MonHocPtr &tree) {
+	string mamh;
+	while (1) {
+		cout << "Nhap ma mon hoc can xoa : ";
+		cin >> mamh;
+		if (SearchMH(tree, mamh) == NULL) {
+			cout << "ma mon hoc khong ton tai ! nhap lai"<<endl;
+			continue;
+		}
+
+		// SAVE
+		XoaMonhoc(tree, mamh);
+		return 1;
+	}
+}
+
+int xuLyHieuChinhMonhoc(MonHocPtr &tree) {
+	MonHoc mh;
+	while (1) {
+		cout << "Nhap ma mon hoc can hieu chinh: ";
+		cin >> mh.maMH;
+		MonHocPtr mhptr = SearchMH(tree,mh.maMH);
+		if (mhptr == NULL) {
+			cout << "ma mon hoc khong ton tai ! nhap lai"<<endl;
+			continue;
+		}
+		// hien thi thong tin mon hoc da nhap 
+		cout << "	Thong tin mon hoc"<<endl;
+		cout << " MA MON HOC: " + mhptr->mh.maMH + "  ";
+		cout << " TEN MON HOC: " + mhptr->mh.tenMH + " ";
+		cout << " STCLT: " << mhptr->mh.soTCLT << "  ";
+		cout << " STCTH: " << mhptr->mh.soTCTH << endl<<endl;
+
+		cout << "Nhap ten mon hoc can hieu chinh: ";
+		cin >> mh.tenMH;
+		cout << "Nhap so tin chi ly thuyet can hieu chinh: ";
+		cin >> mh.soTCLT;
+		cout << "Nhap so tin chi thuc hanh can hieu chinh : ";
+		cin >> mh.soTCTH;
+		// SAVE
+		mhptr->mh.tenMH = mh.tenMH;
+		mhptr->mh.soTCLT = mh.soTCLT;
+		mhptr->mh.soTCTH = mh.soTCTH;
+		return 1;
+	}
+}
+
+
+void IndsMonhoc(MonHocPtr tree) {
+	if (tree != NULL)
+	{
+		IndsMonhoc(tree->pLeft);
+		IndsMonhoc(tree->pRight);
+		cout << " MA MON HOC: " + tree->mh.maMH +"  ";
+		cout << " TEN MON HOC: " + tree->mh.tenMH+" " ;
+		cout << " STCLT: "<<tree->mh.soTCLT << "  ";
+		cout << " STCTH: "<<tree->mh.soTCTH << endl;
+	}
+//	else {
+//		cout << "2";
+//		cout << " Danh Sach trong" << endl;
+//		cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
+//		char ch = _getch();
+//		if (ch == 27) return;
+//	}
+}
+
+/////////////// lop ///////////////
+
+
+int xuLyThemLop(ListLop &list) {
+	Lop lop;
+	while (1) {
+		cout << "Nhap ma lop : ";
+		cin >> lop.maLop;
+		if (search_MaLop(list, lop.maLop) != NULL) {
+			cout << "ma lop da ton tai ! nhap lai" << endl;
+			continue;
+		}
+		cout << "Nhap ten lop : ";
+		cin >> lop.tenLop;
+		cout << "Nhap nam nhap hoc : ";
+		cin >> lop.namNhapHoc;
+
+		// SAVE
+		//insert_Lop()
+		return 1;
+	}
+}
+
+void xuLyXoaLop(ListLop &list) {
+	string malop;
+	while (1) {
+		cout << "Nhap ma lop : ";
+		cin >> malop;
+		LopPtr lopptr = search_MaLop(list, malop);
+		if ( lopptr == NULL) {
+			cout << "ma lop không ton tai ! nhap lai" << endl;
+			continue;
+		}
+		// ktr
+		if (lopptr->dSSV == NULL) { // ton tai sinh vien
+			cout << "lop dang ton tai sinh vien ! khong the xoa" << endl;
+			cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
+			char ch = _getch();
+			if (ch == 27) return;
+		}
+		//xoa dc
+		cout << "ban co chac muon xoa lop nay (Y/N)?";
+		string check;
+		cin >> check;
+		if (check == "N") {
+			return;
+		}
+		
+		// xu li xoa lop
+		for (int j = 1; j < list.n; j++) {
+			if (list.dSLop[j]->maLop == malop) {
+				delete_Lop(list, j);
+				return;
+			}
+		}
+		// SAVE
+		return;
+	}
+}
+
+
+int xuLyHieuChinhLop(ListLop &list) {
+	Lop lop;
+	while (1) {
+		cout << "Nhap ma lop : ";
+		cin >> lop.maLop;
+		LopPtr lopptr = search_MaLop(list, lop.maLop);
+		if (lopptr == NULL) {
+			cout << "ma lop không ton tai ! nhap lai" << endl;
+			continue;
+		}
+		cout << " MA LOP: " + lopptr->maLop + "  ";
+		cout << " TEN LOP: " + lopptr->tenLop + "  ";
+		cout << " NAM NHAP HOC: " + lopptr->namNhapHoc; cout << " ";
+		cout << "Nhap ten lop can hieu chinh: ";
+		cin >> lop.tenLop;
+		cout << "Nhap mam nhap hoc hieu chinh: ";
+		cin >> lop.namNhapHoc;
+		
+		//SAVE
+		update_Lop(list, lop);
+		return 1;
+	}
+}
+
+void IndsLopNienKhoa(ListLop &list) {
+	int nienkhoa;
+	cout << "Nhap nien khoa: ";
+	cin >>nienkhoa;
+	LopPtr lop = new Lop[100];
+	lop = search_NNH(list, nienkhoa);
+	if (lop[0].namNhapHoc == 0) {
+		cout << "khong co lop nao cua nien khoa nay" << endl;
+		cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
+		char ch = _getch();
+		if (ch == 27) return;
+	}
+	for (int i = 0; i < 100;i++) {
+		cout << "Ma lop " + lop[i].maLop + "   ";
+		cout << "Ten lop " + lop[i].tenLop + "   ";
+		cout << "Năm nhập học " + lop[i].namNhapHoc<<endl;
+	}
+}

@@ -16,9 +16,9 @@ using namespace std;
 // ham ve
 void drawText(int line, int cot, int focus, char Text[]);
 // phan lop
-int menuLOP();
+int menuLOP(MonHocPtr &tree);
 // phan monhoc
-int menuMonHoc();
+int menuMonHoc(MonHocPtr &tree);
 // menu chinh
-int menuChinh();
+void menuChinh(MonHocPtr &tree);
 

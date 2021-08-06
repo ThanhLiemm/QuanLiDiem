@@ -6,8 +6,10 @@
 
 int main()
 {
+	MonHocPtr tree;
+	Initialize(tree);
 	while (true) {
-		menuChinh();
+		menuChinh(tree);
 	}
 
 }
