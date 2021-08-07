@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include<string>
 #include<windows.h>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <iomanip>
+#define MAX 50
 #define MAXLIST 100
 using namespace std;
 enum Phai{nam =0, nu = 1};
@@ -43,14 +48,19 @@ typedef struct Lop
 	string maLop;
 	string tenLop;
 	unsigned int namNhapHoc;
+	
+};
+
+struct LopPtr
+{
+	Lop Data;
 	NodeSVPtr dSSV;
 };
-typedef struct Lop* LopPtr;
 
 typedef struct ListLop
 {
-	unsigned int n;
-	LopPtr dSLop[MAXLIST];
+	unsigned int n = 0;
+	LopPtr *dSLop[MAXLIST];
 };
 
 typedef struct MonHoc {
@@ -65,6 +75,7 @@ typedef struct NodeMonHoc {
 	NodeMonHoc *pLeft, *pRight;
 };
 typedef NodeMonHoc* MonHocPtr;
+
 //-----------------------diem -------------------//
 //khoi tao 
 void Initialize(NodeDiemPtr &firstD);
@@ -117,16 +128,16 @@ int delete_maSV(NodeSVPtr firstSV, string maSV);
 int empty(ListLop list);
 //kiem tra xem danh sach da day chua;
 int full(ListLop list);
-// them lop o vi tri thu i gia tri la lop
-int insert_Lop(ListLop &list, int i, Lop lop);
 // xoa phan tu o vi tri thu i
-int delete_Lop(ListLop &list, int i);
+int delete_Lop_I(ListLop &list, int i);
 // tim kiem thong tin lop thong qua ma lop
-LopPtr search_MaLop(ListLop list, string malop);
+boolean search_MaLop(ListLop list, string malop);
 // lay ra danh sach lop theo nien khoa
-LopPtr search_NNH(ListLop list, unsigned int nNH);
+Lop search_NNH(ListLop list, unsigned int nNH);
 // chinh sua thong tin cua lop
-int update_Lop(ListLop list, Lop lop);
+int update_lop(ListLop  &list, Lop lop);
+
+int insert_Lop(ListLop &list, Lop lop);
 
 //----------------------- MonHoc -------------------//
 //khoi tao
@@ -140,8 +151,9 @@ void NodeThe(MonHocPtr &X, MonHocPtr &Y);
 int XoaMonhoc(MonHocPtr &t, string maMH);
 
 
-/////////Xu ly///////////
-// ----- Mon hoc --------- //
+
+///////////////Xu ly///////////
+//----------------------- MonHoc -------------------//
 
 int xuLyThemMonhoc(MonHocPtr &tree);
 
@@ -151,7 +163,23 @@ int xuLyHieuChinhMonhoc(MonHocPtr &tree);
 
 void IndsMonhoc(MonHocPtr tree);
 
+bool Monhoc_Alpha_Compare(MonHoc S1, MonHoc S2);
 
+void Monhoc_Convert(MonHocPtr t);
+
+void Monhoc_Alpha_Sort(MonHocPtr t);
+
+void IndsMonhoc(MonHocPtr tree);
+
+//----------------------- LOP -------------------//
+
+int xuLyHieuChinhLop(ListLop &list);
+
+int xuLyThemLop(ListLop &list);
+
+int xuLyXoaLop(ListLop &list);
+
+void IndsLopNienKhoa(ListLop &list);
 
 
 

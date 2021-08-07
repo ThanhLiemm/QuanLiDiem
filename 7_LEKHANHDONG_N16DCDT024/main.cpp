@@ -8,8 +8,9 @@ int main()
 {
 	MonHocPtr tree;
 	Initialize(tree);
+	ListLop listlop;
 	while (true) {
-		menuChinh(tree);
+		menuChinh(tree, listlop);
 	}
 
 }

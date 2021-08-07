@@ -1,5 +1,38 @@
 ﻿#include "7_LEKHANHDONG_N16DCDT024.h"
 
+
+//---------------------- goto xy ---------------//
+void gotoxy(short x, short y)
+{
+	HANDLE hConsoleOutput;
+	COORD Cursor_an_Pos = { x,y };
+	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hConsoleOutput, Cursor_an_Pos);
+}
+
+int wherex(void)
+{
+	HANDLE hConsoleOutput;
+	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+	GetConsoleScreenBufferInfo(hConsoleOutput, &screen_buffer_info);
+	return screen_buffer_info.dwCursorPosition.X;
+}
+
+int wherey(void)
+{
+	HANDLE hConsoleOutput;
+	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+	GetConsoleScreenBufferInfo(hConsoleOutput, &screen_buffer_info);
+	return screen_buffer_info.dwCursorPosition.Y;
+}
+
+//----------//
+
+
+
+
 //-----------------------diem -------------------//
 //khoi tao 
 void Initialize(NodeDiemPtr &firstD)
@@ -181,62 +214,74 @@ int empty(ListLop list) {
 int full(ListLop list) {
 	return (list.n == MAXLIST ? 1 : 0);
 }
-// them lop o vi tri thu i gia tri la lop
-int insert_Lop(ListLop &list, int i, Lop lop) {
-	int j;
-	if (i<0 || i> list.n + 1 || full(list)) return 0;
+
+int insert_Lop(ListLop &list, Lop lop)
+{
 	if (empty(list)) {
-		*list.dSLop[0] = lop;
+		list.dSLop[list.n] = new LopPtr();
+		list.dSLop[list.n]->Data = lop;
+		list.dSLop[list.n]->dSSV = NULL;
 		list.n = 1;
 	}
 	else {
-		if (i == 0) i = 1;
-		for (j = list.n - 1; j >= i - 1; j--)
-			list.dSLop[j + 1] = list.dSLop[j];
-		*list.dSLop[i - 1] = lop;
 		list.n++;
+		list.dSLop[list.n-1] = new LopPtr();
+		list.dSLop[list.n-1]->Data = lop;
+		list.dSLop[list.n-1]->dSSV = NULL;
+		
 	}
 	return 1;
 }
+
+
 // xoa phan tu o vi tri thu i
-int delete_Lop(ListLop &list, int i) {
+int delete_Lop_I(ListLop &list, int i) {
 	int j;
 	if (i<0 || i>list.n || list.n == 0) return 0;
-	if (i == 0) i = 1;
-	for (j = 1; j < list.n; j++)
-		list.dSLop[j - 1] = list.dSLop[j];
+	//if (i == 0) i = 1;
+	for (j = i; j < list.n; j++)
+		list.dSLop[j] = list.dSLop[j+1];
 	list.n--;
 }
+
+
+
 // tim kiem thong tin lop thong qua ma lop
-LopPtr search_MaLop(ListLop list, string malop) {
-	if (list.n == 0) return NULL;
+boolean search_MaLop(ListLop list, string malop) {
+	if (list.n == 0) return false;
 	for (int i = 0; i < list.n; i++)
 	{
-		Lop tem = *list.dSLop[i];
-		if (tem.maLop == malop) return list.dSLop[i];
+		if (list.dSLop[i]->Data.maLop == malop) return true;
 	}
-	return NULL;
+	return false;
 }
+
+
 // lay ra danh sach lop theo nien khoa
-LopPtr search_NNH(ListLop list, unsigned int nNH) {
-	if (list.n == 0) return NULL;
-	LopPtr lop = new Lop[100];
-	int count = 0;
-	for (int i = 0; i < list.n; i++) {
-		Lop temp = *list.dSLop[i];
-		if (temp.namNhapHoc == nNH) {
-			lop[count] = temp;
+//boolean search_NNH(ListLop list, unsigned int nNH) {
+//	if (list.n == 0) return true;
+//	LopPtr lop = new Lop[100];
+//	int count = 0;
+//	for (int i = 0; i < list.n; i++) {
+//		Lop temp = *list.dSLop[i];
+//		if (temp.namNhapHoc == nNH) {
+//			lop[count] = temp;
+//		}
+//	}
+//	return lop;
+//}
+
+// chinh sua thong tin cua lop
+int update_lop(ListLop  &list, Lop lop) {
+	// kiem tra ma lop
+	for (int i = 0; i < list.n; i++)
+	{
+		if (list.dSLop[i]->Data.maLop == lop.maLop) {
+			list.dSLop[i]->Data = lop;
+			return 1;
 		}
 	}
-	return lop;
-}
-// chinh sua thong tin cua lop
-int update_Lop(ListLop list, Lop lop) {
-	// kiem tra ma lop
-	LopPtr oldLop = search_MaLop(list, lop.maLop);
-	if (&lop == NULL) return 0;
-	*oldLop = lop;
-	return 1;
+	return 0;
 }
 
 //----------------------- MonHoc -------------------//
@@ -350,19 +395,20 @@ int XoaMonhoc(MonHocPtr &t, string maMH)
 int xuLyThemMonhoc(MonHocPtr &tree) {
 	MonHoc mh;
 	while (1) {
-		cout << "Nhap ma mon hoc : ";
-		cin >> mh.maMH;
-		if (SearchMH(tree, mh.maMH) != NULL) {
-			cout << "ma mon hoc da ton tai ! nhap lai"<<endl;
-			continue;
-		}
-		cout << "Nhap ten mon hoc : ";
-		cin >> mh.tenMH;
-		cout << "Nhap so tin chi ly thuyet : ";
-		cin >> mh.soTCLT;
-		cout << "Nhap so tin chi thuc hanh : ";
-		cin >> mh.soTCTH;
-		cout << "check - " + mh.soTCLT;
+			cout << "Nhap ma mon hoc : ";
+			cin >> mh.maMH;
+			if (SearchMH(tree, mh.maMH) != NULL) {
+				cout << "ma mon hoc da ton tai ! nhap lai" << endl;
+				continue;
+			}
+			cout << "Nhap ten mon hoc : ";
+			cin >> mh.tenMH;
+			cout << "Nhap so tin chi ly thuyet : ";
+			cin >> mh.soTCLT;
+		
+			cout << "Nhap so tin chi thuc hanh : ";
+			cin >> mh.soTCTH;
+		
 		
 		// SAVE
 		InsertMH(tree, mh);
@@ -379,7 +425,13 @@ int xuLyXoaMonhoc(MonHocPtr &tree) {
 			cout << "ma mon hoc khong ton tai ! nhap lai"<<endl;
 			continue;
 		}
-
+		cout << "ban co chac muon xoa mon hoc nay (Y/N)?";
+		string check;
+		cin >> check;
+		for (auto & c : check) check = toupper(c);
+		if (check != "Y") {
+			return 0;
+		}
 		// SAVE
 		XoaMonhoc(tree, mamh);
 		return 1;
@@ -418,34 +470,65 @@ int xuLyHieuChinhMonhoc(MonHocPtr &tree) {
 }
 
 
-void IndsMonhoc(MonHocPtr tree) {
-	if (tree != NULL)
-	{
-		IndsMonhoc(tree->pLeft);
-		IndsMonhoc(tree->pRight);
-		cout << " MA MON HOC: " + tree->mh.maMH +"  ";
-		cout << " TEN MON HOC: " + tree->mh.tenMH+" " ;
-		cout << " STCLT: "<<tree->mh.soTCLT << "  ";
-		cout << " STCTH: "<<tree->mh.soTCTH << endl;
-	}
-//	else {
-//		cout << "2";
-//		cout << " Danh Sach trong" << endl;
-//		cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
-//		char ch = _getch();
-//		if (ch == 27) return;
-//	}
+// vector mon hoc sort monhoc theo ten mon hoc
+vector<MonHoc> MonHoc_Arr;
+
+bool Monhoc_Alpha_Compare(MonHoc S1,MonHoc S2)
+{
+	return (S1.maMH < S2.maMH);
 }
+
+void Monhoc_Convert(MonHocPtr t)
+{
+	if (t == NULL)
+		return;
+	Monhoc_Convert(t->pLeft);
+	MonHoc_Arr.push_back(t->mh);
+	Monhoc_Convert(t->pRight);
+}
+
+
+void Monhoc_Alpha_Sort(MonHocPtr t)
+{
+	MonHoc_Arr.erase(MonHoc_Arr.begin(), MonHoc_Arr.end());
+	Monhoc_Convert(t);
+	sort(MonHoc_Arr.begin(), MonHoc_Arr.end(), Monhoc_Alpha_Compare);
+}
+
+void IndsMonhoc(MonHocPtr tree) {
+	Monhoc_Alpha_Sort(tree);
+	for (int i = 0; i < MonHoc_Arr.size(); i++)
+	{
+		gotoxy(0, wherey());
+		cout << " MA MON HOC: " + MonHoc_Arr[i].maMH;
+		gotoxy(20, wherey());
+		cout << " TEN MON HOC: " + MonHoc_Arr[i].tenMH;
+		gotoxy(40, wherey());
+		cout << " STCLT: " << MonHoc_Arr[i].soTCLT;
+		gotoxy(60, wherey());
+		cout << " STCTH: " << MonHoc_Arr[i].soTCTH << endl;
+	}
+
+}
+
+
 
 /////////////// lop ///////////////
 
 
 int xuLyThemLop(ListLop &list) {
 	Lop lop;
+	if (full(list) == 1) {
+		cout << "list lop da day ! ";
+		cout << "an phim bat ki de thoat";
+		_getch();
+		return 0;
+	}
 	while (1) {
-		cout << "Nhap ma lop : ";
-		cin >> lop.maLop;
-		if (search_MaLop(list, lop.maLop) != NULL) {
+		cout<< "Nhap ma lop : ";
+		cin>>lop.maLop;
+		
+		if ( search_MaLop(list, lop.maLop) != NULL) {
 			cout << "ma lop da ton tai ! nhap lai" << endl;
 			continue;
 		}
@@ -455,45 +538,44 @@ int xuLyThemLop(ListLop &list) {
 		cin >> lop.namNhapHoc;
 
 		// SAVE
-		//insert_Lop()
+		insert_Lop(list,lop);
 		return 1;
 	}
 }
 
-void xuLyXoaLop(ListLop &list) {
+int xuLyXoaLop(ListLop &list) {
 	string malop;
 	while (1) {
 		cout << "Nhap ma lop : ";
 		cin >> malop;
-		LopPtr lopptr = search_MaLop(list, malop);
-		if ( lopptr == NULL) {
-			cout << "ma lop không ton tai ! nhap lai" << endl;
+		if (!search_MaLop(list, malop)) {
+			cout << "ma lop khong ton tai ! nhap lai" << endl;
 			continue;
 		}
-		// ktr
-		if (lopptr->dSSV == NULL) { // ton tai sinh vien
-			cout << "lop dang ton tai sinh vien ! khong the xoa" << endl;
-			cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
-			char ch = _getch();
-			if (ch == 27) return;
-		}
-		//xoa dc
-		cout << "ban co chac muon xoa lop nay (Y/N)?";
-		string check;
-		cin >> check;
-		if (check == "N") {
-			return;
-		}
-		
+
 		// xu li xoa lop
-		for (int j = 1; j < list.n; j++) {
-			if (list.dSLop[j]->maLop == malop) {
-				delete_Lop(list, j);
-				return;
+		for (int j = 0; j < list.n; j++) {
+			if (list.dSLop[j]->Data.maLop == malop) {
+				if (list.dSLop[j]->dSSV != NULL) {
+					cout << "lop dang ton tai sinh vien ! khong the xoa" << endl;
+					_getch();
+					return 0;
+				}
+				//xoa dc
+				cout << "ban co chac muon xoa lop nay (Y/N)?";
+				string check;
+				cin >> check;
+				for (auto & c : check) check = toupper(c);
+				if (check != "Y") {
+					return 0;
+				}
+				delete_Lop_I(list, j);
+				// SAVE
+				return 1;
 			}
 		}
-		// SAVE
-		return;
+	
+		return 0;
 	}
 }
 
@@ -503,40 +585,102 @@ int xuLyHieuChinhLop(ListLop &list) {
 	while (1) {
 		cout << "Nhap ma lop : ";
 		cin >> lop.maLop;
-		LopPtr lopptr = search_MaLop(list, lop.maLop);
-		if (lopptr == NULL) {
+		if (!search_MaLop(list, lop.maLop)) {
 			cout << "ma lop không ton tai ! nhap lai" << endl;
 			continue;
 		}
-		cout << " MA LOP: " + lopptr->maLop + "  ";
-		cout << " TEN LOP: " + lopptr->tenLop + "  ";
-		cout << " NAM NHAP HOC: " + lopptr->namNhapHoc; cout << " ";
+		//cout << " MA LOP: " + lopp->maLop + "  ";
+		//cout << " TEN LOP: " + lopptr->tenLop + "  ";
+		//cout << " NAM NHAP HOC: " + lopptr->namNhapHoc; cout << " ";
 		cout << "Nhap ten lop can hieu chinh: ";
 		cin >> lop.tenLop;
 		cout << "Nhap mam nhap hoc hieu chinh: ";
-		cin >> lop.namNhapHoc;
-		
+		cin >> lop.namNhapHoc;	
 		//SAVE
-		update_Lop(list, lop);
+		update_lop(list, lop);
 		return 1;
 	}
 }
 
 void IndsLopNienKhoa(ListLop &list) {
+	if (empty(list)) {
+		cout << "khong co lop nao trong danh sach" << endl;
+		return;
+	}
 	int nienkhoa;
 	cout << "Nhap nien khoa: ";
-	cin >>nienkhoa;
-	LopPtr lop = new Lop[100];
-	lop = search_NNH(list, nienkhoa);
-	if (lop[0].namNhapHoc == 0) {
-		cout << "khong co lop nao cua nien khoa nay" << endl;
-		cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
-		char ch = _getch();
-		if (ch == 27) return;
+	cin >> nienkhoa;
+	
+	for (int i = 0; i < list.n; i++)
+	{
+		if (list.dSLop[i]->Data.namNhapHoc == nienkhoa) {
+			gotoxy(0, wherey());
+			cout << "MA LOP: "+ list.dSLop[i]->Data.maLop;
+			gotoxy(20, wherey());
+			cout << "TEN LOP: "+ list.dSLop[i]->Data.tenLop;
+			gotoxy(40, wherey());
+			cout << "NIEN KHOA: " << list.dSLop[i]->Data.namNhapHoc<< endl;
+		}
 	}
-	for (int i = 0; i < 100;i++) {
-		cout << "Ma lop " + lop[i].maLop + "   ";
-		cout << "Ten lop " + lop[i].tenLop + "   ";
-		cout << "Năm nhập học " + lop[i].namNhapHoc<<endl;
-	}
+	return;
 }
+
+
+//////////////// SAVE //////////////////
+
+//--------Monhoc------------//
+
+int countTree(MonHocPtr T)
+{
+	if (T == NULL) return 0;
+	else
+		if (T->pLeft == NULL && T->pRight == NULL) return 1;
+		else return countTree(T->pLeft) + countTree(T->pRight);
+}
+
+
+void Monhoc_Save(MonHocPtr tree)
+{
+	string Subjects_Info = "monhoc.txt";
+	ofstream Output(Subjects_Info);
+	//if (Subjects_Count == 0)
+	//{
+	//	Output << "";
+	//	Output.close();
+	//	return;
+	//}
+	//else
+	//{
+		Monhoc_Convert(tree);
+		Monhoc_Alpha_Sort(tree);
+
+		// 
+
+		int count = countTree(tree);
+		char End[] = "----------";
+		for (int i = 0; i < count - 1; i++)
+		{
+			Output << MonHoc_Arr[i].maMH << endl;
+			Output << MonHoc_Arr[i].tenMH << endl;
+			Output << MonHoc_Arr[i].soTCLT << endl;
+			Output << MonHoc_Arr[i].soTCTH << endl;
+			Output << End << endl;
+		}
+		int i = count - 1;
+		Output << MonHoc_Arr[i].maMH << endl;
+		Output << MonHoc_Arr[i].tenMH << endl;
+		Output << MonHoc_Arr[i].soTCLT << endl;
+		Output << MonHoc_Arr[i].soTCTH << endl;
+		Output << End;
+		Output.close();
+		MonHoc_Arr.erase(MonHoc_Arr.begin(), MonHoc_Arr.end());
+		return;
+	//}
+}
+
+
+//////////////// LOAD //////////////////
+
+//--------Monhoc------------//
+
+

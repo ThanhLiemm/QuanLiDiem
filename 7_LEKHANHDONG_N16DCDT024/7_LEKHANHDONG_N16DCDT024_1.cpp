@@ -7,15 +7,14 @@ void drawText(int line, int cot, int focus, char Text[]) {
 	printf("%s\n", Text);
 }
 // phan lop
-int menuLOP() {
+int menuLOP(ListLop &listlop) {
 	system("cls");
 	char MenuLOP[][100] = { "\t\|--------------------------|Quan Ly Lop|-----------------------------|ESC-thoat|",
-						"\t\|\t\t\        Xem danh sach lop                                     |",
-						"\t\|\t\t\        Them lop                                              |",
-						"\t\|\t\t\        Xoa lop                                               |",
-						"\t\|\t\t\        Hieu chinh lop                                        |",
-						"\t\|--------------------------------------------------------------------------|",
-
+						"\t\|\t\t\        Xem danh sach lop                                      |",
+						"\t\|\t\t\        Them lop                                               |",
+						"\t\|\t\t\        Xoa lop                                                |",
+						"\t\|\t\t\        Hieu chinh lop                                         |",
+						"\t\|-----------------------------------------------------------------------------|",
 	};
 
 	char ch;
@@ -50,11 +49,53 @@ int menuLOP() {
 	} while (!(ch == ENTER));
 
 	switch (i) {
-	case 2:
-	{
+		case 2:
+		{
+			system("cls");
+			cout << " Danh Sach Lop" << endl;
+			IndsLopNienKhoa(listlop);
+			cout << "ESC de thoat " << endl;
+			char ch = _getch();
+			if (ch == ESC) return 1;
+			break;
 
-		break;
-	}
+			break;
+		}
+		case 3:
+		{
+			system("cls");
+			xuLyThemLop(listlop);
+			break;
+		}
+		case 4:
+		{
+			while (1) {
+				system("cls");
+				if (xuLyXoaLop(listlop) == 1) {
+					cout << " Xoa thanh cong" << endl;
+				}
+				cout << "ESC de thoat -  an phim bat ki de tiep tuc" << endl;
+				char ch = _getch();
+				if (ch == ESC) return 1;
+			}
+			break;
+		}
+		case 5:
+		{
+			while (1) {
+				system("cls");
+				if (xuLyHieuChinhLop(listlop) == 1) {
+					cout << " Hieu chinh thanh cong" << endl;
+				}
+				else {
+					cout << " khong tim thay" << endl;
+				}
+				cout << "ESC de thoat - an phim bat ki de tiep tuc" << endl;
+				char ch = _getch();
+				if (ch == ESC) return 1;
+			}
+			break;
+		}
 
 	}
 }
@@ -62,11 +103,11 @@ int menuLOP() {
 int menuMonHoc(MonHocPtr &tree) {
 	system("cls");
 	char MenuMH[][100] = { "\t\|--------------------------|Quan Ly Mon Hoc|-----------------------------|ESC-thoat|",
-						"\t\|\t\t\        Xem danh sach Mon Hoc                                     |",
-						"\t\|\t\t\        Them mon Hoc                                              |",
-						"\t\|\t\t\        Xoa mon hoc                                               |",
-						"\t\|\t\t\        Hieu chinh mon hoc                                        |",
-						"\t\|--------------------------------------------------------------------------|",
+						"\t\|\t\t\        Xem danh sach Mon Hoc                                      |",
+						"\t\|\t\t\        Them mon Hoc                                               |",
+						"\t\|\t\t\        Xoa mon hoc                                                |",
+						"\t\|\t\t\        Hieu chinh mon hoc                                         |",
+						"\t\|-----------------------------------------------------------------------------|",
 
 	};
 
@@ -97,7 +138,7 @@ int menuMonHoc(MonHocPtr &tree) {
 			i--;
 			if (i < 2) i = 5;
 		}
-		if (ch == 27) {
+		if (ch == ESC) {
 			return 2;
 		}
 	} while (!(ch == 13));
@@ -111,11 +152,11 @@ int menuMonHoc(MonHocPtr &tree) {
 	case 2:
 	{
 		system("cls");
-		cout << " Danh Sach Mon Hoc" << endl;
+		cout << "                  Danh Sach Mon Hoc" << endl;
 		IndsMonhoc(tree);
 		cout << "ESC de thoat " << endl;
 		char ch = _getch();
-		if (ch == 27) return 1;
+		if (ch == ESC) return 1;
 		break;
 
 	}
@@ -130,8 +171,7 @@ int menuMonHoc(MonHocPtr &tree) {
 	{
 		while (1) {
 			system("cls");
-			int check = xuLyXoaMonhoc(tree);
-			if (check == 1) {
+			if (xuLyXoaMonhoc(tree) == 1) {
 				cout << " Xoa thanh cong" << endl;
 			}
 			else {
@@ -139,7 +179,7 @@ int menuMonHoc(MonHocPtr &tree) {
 			}
 			cout << "ESC de thoat -  an phim bat ki de tiep tuc" << endl;
 			char ch = _getch();
-			if (ch == 27) return 1;
+			if (ch == ESC) return 1;
 		}
 		break;
 	}
@@ -148,8 +188,7 @@ int menuMonHoc(MonHocPtr &tree) {
 	{
 		while (1) {
 			system("cls");
-			int check = xuLyHieuChinhMonhoc(tree);
-			if (check == 1) {
+			if (xuLyHieuChinhMonhoc(tree) == 1) {
 				cout << " Hieu chinh thanh cong" << endl;
 			}
 			else {
@@ -157,7 +196,7 @@ int menuMonHoc(MonHocPtr &tree) {
 			}
 			cout << "ESC de thoat  -  an phim bat ki de tiep tuc" << endl;
 			char ch = _getch();
-			if (ch == 27) return 1;
+			if (ch == ESC) return 1;
 		}
 		break;
 	}
@@ -165,7 +204,7 @@ int menuMonHoc(MonHocPtr &tree) {
 	}
 }
 // menu chinh
-void menuChinh(MonHocPtr &tree) {
+void menuChinh(MonHocPtr &tree, ListLop &listlop) {
 	system("cls");
 	char MenuChinh[][1000] = { "\t\|-----------------------------------|QUAN LI DIEM SINH VIEN|----------------------------------|ESC-thoat| ",
 						"\t\|\t\t\t\t\        Quan ly lop                                           |",
@@ -177,7 +216,7 @@ void menuChinh(MonHocPtr &tree) {
 						"\t\|\t\t\t\t\        In bang diem mon hoc                                  |",
 						"\t\|\t\t\t\t\        In diem trung binh lop                                |",
 						"\t\|\t\t\t\t\        In bang diem tong ket sinh vien                       |",
-						"\t\|------------------------------------------------------------------------------------------|"
+						"\t\|--------------------------------------------------------------------------------------------|"
 	};
 
 	char ch;
@@ -214,16 +253,17 @@ void menuChinh(MonHocPtr &tree) {
 	switch (i) {
 	case 2:
 	{
+		while (true) {
+			if (menuLOP(listlop) == 2) return;
+		}
 		
-		menuLOP();
 		break;
 	}
 
 	case 3:
 	{
 		while (true) {
-			int kt = menuMonHoc(tree);
-			if (kt == 2) return;
+			if (menuMonHoc(tree) == 2) return;
 		}
 	}
 	}

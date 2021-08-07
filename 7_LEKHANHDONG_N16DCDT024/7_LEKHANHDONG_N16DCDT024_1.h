@@ -20,5 +20,5 @@ int menuLOP(MonHocPtr &tree);
 // phan monhoc
 int menuMonHoc(MonHocPtr &tree);
 // menu chinh
-void menuChinh(MonHocPtr &tree);
+void menuChinh(MonHocPtr &tree, ListLop &listlop);
 
