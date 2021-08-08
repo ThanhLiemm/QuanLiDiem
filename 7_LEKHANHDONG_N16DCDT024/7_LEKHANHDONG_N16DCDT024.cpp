@@ -120,7 +120,17 @@ int delete_maMH(NodeDiemPtr &firstD, string maMH,unsigned int lan) {
 // update diem theo ma mon hoc
 int update_maMH(NodeDiemPtr &fristD, string maMH, float d);
 // tinh diem trung binh cua sv
-float average(NodeDiemPtr &firstD);
+float average(NodeDiemPtr &firstD) {
+	NodeDiemPtr p;
+	float s = 0;
+	int n = 0;
+	for (p = firstD; p != NULL; p = p->next) {
+		s += p->d.diem;
+		n++;
+	}
+	if (n == 0) return 0;
+	else return s / n;
+}
 
 
 //----------------------- Sinh Vien -------------------//
@@ -136,12 +146,15 @@ NodeSVPtr newNodeSVPtr(void) {
 // them vao dau
 void insert_First(NodeSVPtr &firstSV, SinhVien sv) {
 	if (firstSV == NULL) {
+		firstSV = newNodeSVPtr();
 		firstSV->sV = sv;
 		firstSV->next = NULL;
+		firstSV->sV.firstD = NULL;
 	}
 	else {
 		NodeSVPtr p = new NodeSV;
 		p->sV = sv;
+		p->sV.firstD = NULL;
 		p->next = firstSV;
 		firstSV = p;
 	}
@@ -186,9 +199,18 @@ NodeSVPtr search_SV(NodeSVPtr firstSV, string maSV) {
 	return NULL;
 }
 // cap nhat thong tin sv
-int updateSV(NodeSVPtr firstSV, SinhVien sv);
+int updateSV(NodeSVPtr &firstSV, SinhVien sv) {
+	NodeSVPtr p;
+	for (p = firstSV; p != NULL; p = p->next) {
+		if (p->sV.maSV == sv.maSV) {
+			p->sV = sv;
+			return 1;
+		}
+	}
+	return 0;
+}
 // xoa sv thong qua ma sv
-int delete_maSV(NodeSVPtr firstSV, string maSV) {
+int delete_maSV(NodeSVPtr &firstSV, string maSV) {
 	NodeSVPtr p, q;
 	p = search_SV(firstSV, maSV);
 	if (p == NULL) {
@@ -255,7 +277,14 @@ boolean search_MaLop(ListLop list, string malop) {
 	}
 	return false;
 }
-
+LopPtr* getlop(ListLop list, string malop) {
+	if (list.n == 0) return NULL ;
+	for (int i = 0; i < list.n; i++)
+	{
+		if (list.dSLop[i]->Data.maLop == malop) return list.dSLop[i];
+	}
+	return NULL ;
+}
 
 // lay ra danh sach lop theo nien khoa
 //boolean search_NNH(ListLop list, unsigned int nNH) {
@@ -309,7 +338,6 @@ MonHocPtr SearchMH(MonHocPtr &root, string maMH) {
 // insert mon hoc
 MonHocPtr InsertMH(MonHocPtr &tree, MonHoc &mh) {
 	if (tree == NULL) {
-		
 		MonHocPtr p = new NodeMonHoc();
 		p->pLeft = p->pRight = NULL;
 		p->mh = mh;
@@ -409,9 +437,8 @@ int xuLyThemMonhoc(MonHocPtr &tree) {
 			cout << "Nhap so tin chi thuc hanh : ";
 			cin >> mh.soTCTH;
 		
-		
-		// SAVE
 		InsertMH(tree, mh);
+		Monhoc_Save(tree);	
 		return 1;
 	}
 }
@@ -432,8 +459,9 @@ int xuLyXoaMonhoc(MonHocPtr &tree) {
 		if (check != "Y") {
 			return 0;
 		}
-		// SAVE
+
 		XoaMonhoc(tree, mamh);
+		Monhoc_Save(tree);
 		return 1;
 	}
 }
@@ -465,6 +493,8 @@ int xuLyHieuChinhMonhoc(MonHocPtr &tree) {
 		mhptr->mh.tenMH = mh.tenMH;
 		mhptr->mh.soTCLT = mh.soTCLT;
 		mhptr->mh.soTCTH = mh.soTCTH;
+
+		Monhoc_Save(tree);
 		return 1;
 	}
 }
@@ -539,6 +569,7 @@ int xuLyThemLop(ListLop &list) {
 
 		// SAVE
 		insert_Lop(list,lop);
+		Lop_Save(list);
 		return 1;
 	}
 }
@@ -571,6 +602,7 @@ int xuLyXoaLop(ListLop &list) {
 				}
 				delete_Lop_I(list, j);
 				// SAVE
+				Lop_Save(list);
 				return 1;
 			}
 		}
@@ -598,6 +630,7 @@ int xuLyHieuChinhLop(ListLop &list) {
 		cin >> lop.namNhapHoc;	
 		//SAVE
 		update_lop(list, lop);
+		Lop_Save(list);
 		return 1;
 	}
 }
@@ -626,6 +659,8 @@ void IndsLopNienKhoa(ListLop &list) {
 }
 
 
+
+
 //////////////// SAVE //////////////////
 
 //--------Monhoc------------//
@@ -638,44 +673,92 @@ int countTree(MonHocPtr T)
 		else return countTree(T->pLeft) + countTree(T->pRight);
 }
 
+void SaveMH(ofstream &fileout, MonHocPtr tree) {
+	if (tree != NULL) {
+		fileout << tree->mh.maMH << ",";
+		fileout << tree->mh.tenMH << ",";
+		fileout << tree->mh.soTCLT << ",";
+		fileout << tree->mh.soTCTH << ",";
+		SaveMH(fileout, tree->pLeft);
+		SaveMH(fileout, tree->pRight);
+	}
+
+}
 
 void Monhoc_Save(MonHocPtr tree)
 {
-	string Subjects_Info = "monhoc.txt";
-	ofstream Output(Subjects_Info);
-	//if (Subjects_Count == 0)
-	//{
-	//	Output << "";
-	//	Output.close();
-	//	return;
-	//}
-	//else
-	//{
-		Monhoc_Convert(tree);
-		Monhoc_Alpha_Sort(tree);
+	ofstream fileout;
+	fileout.open("dsmonhoc.txt", ios_base::out);
+	SaveMH(fileout, tree);
+	fileout.close();
+	return;
+}
 
-		// 
+//--------Diem------------//
+void SaveDiem(ofstream &fileout, Diem d) {
+	fileout << "-";
+	fileout << d.maMH << ",";
+	fileout << d.lan << ",";
+	fileout << d.diem << ",";
+}
 
-		int count = countTree(tree);
-		char End[] = "----------";
-		for (int i = 0; i < count - 1; i++)
-		{
-			Output << MonHoc_Arr[i].maMH << endl;
-			Output << MonHoc_Arr[i].tenMH << endl;
-			Output << MonHoc_Arr[i].soTCLT << endl;
-			Output << MonHoc_Arr[i].soTCTH << endl;
-			Output << End << endl;
-		}
-		int i = count - 1;
-		Output << MonHoc_Arr[i].maMH << endl;
-		Output << MonHoc_Arr[i].tenMH << endl;
-		Output << MonHoc_Arr[i].soTCLT << endl;
-		Output << MonHoc_Arr[i].soTCTH << endl;
-		Output << End;
-		Output.close();
-		MonHoc_Arr.erase(MonHoc_Arr.begin(), MonHoc_Arr.end());
+void Diem_Save(ofstream &fileout, NodeDiemPtr First) {
+	if (Empty(First) || First == NULL || First->d.maMH == "") {
 		return;
-	//}
+	}
+	NodeDiemPtr p;
+	for (p = First; p->next != NULL; p = p->next) {
+		SaveDiem(fileout, p->d);
+	}
+	SaveDiem(fileout, p->d);
+
+	return;
+}
+
+//--------Sinhvien------------//
+void SaveSV(ofstream &fileout, SinhVien sv) {
+
+	fileout << sv.maSV << ",";
+	fileout << sv.ho << ",";
+	fileout << sv.ten << ",";
+	fileout << sv.phai << ",";
+	fileout << sv.sdt << ",";
+	Diem_Save(fileout, sv.firstD);
+	fileout << "/";
+}
+
+void Sinhvien_Save(ofstream &fileout, NodeSVPtr First) {
+
+	if (First == NULL || Empty(First) || First->sV.maSV == "") {
+		return;
+	}
+	NodeSVPtr p;
+	for (p = First; p->next != NULL; p = p->next) {
+		SaveSV(fileout, p->sV);
+	}
+	SaveSV(fileout, p->sV);
+	return;
+}
+
+//--------Lop------------//
+void SaveLop(ofstream &fileout, LopPtr lop) {
+	fileout << lop.Data.maLop << ",";
+	fileout << lop.Data.tenLop << ",";
+	fileout << lop.Data.namNhapHoc << ",";
+	Sinhvien_Save(fileout, lop.dSSV);
+}
+
+void Lop_Save(ListLop list) {
+	ofstream fileout;
+	fileout.open("dslop.txt", ios_base::out);
+	NodeSVPtr p;
+	for (int i = 0; i < list.n; i++) {
+		SaveLop(fileout, *list.dSLop[i]);
+		fileout << "~";
+		fileout << endl;
+	}
+	fileout.close();
+	return;
 }
 
 
@@ -684,3 +767,205 @@ void Monhoc_Save(MonHocPtr tree)
 //--------Monhoc------------//
 
 
+void LoadMH(ifstream &filein, MonHoc &mh) {
+	//mamh
+	getline(filein, mh.maMH, ',');
+
+	// tenmh
+	getline(filein, mh.tenMH, ',');
+
+	// stclt
+	string stclt;
+	getline(filein, stclt, ',');
+	mh.soTCLT = atoi(stclt.c_str());
+
+	// stcth
+	string stcth;
+	getline(filein, stcth, ',');
+	mh.soTCTH = atoi(stcth.c_str());
+}
+
+void Monhoc_Load(MonHocPtr &tree) {
+	ifstream filein;
+	MonHoc mh;
+	filein.open("dsmonhoc.txt", ios::in);
+	if (filein.fail()) {
+		return;
+	}
+	while (!filein.eof()) {
+		LoadMH(filein, mh);
+		if (mh.maMH == "") {
+			return;
+		}
+		InsertMH(tree, mh);
+	}
+	filein.close();
+	return;
+}
+
+
+//--------Diem------------//
+int LoadDiem(ifstream &filein, Diem &d) {
+
+	//ma mh
+	getline(filein, d.maMH, ',');
+
+	//lan
+	string lan;
+	getline(filein, lan, ',');
+	d.lan = atoi(lan.c_str());
+
+	//diem
+	//lan
+	string diem;
+	getline(filein, diem, ',');
+	d.diem = atoi(diem.c_str());
+
+	int num = filein.tellg();
+	string test;
+	getline(filein, test, '/');
+	if (test == "") {
+		getline(filein, test, '~');
+		if (test == "") {
+			return 1;
+		}
+		filein.seekg(num + 1);
+		return 0;
+	}
+	else {
+		filein.seekg(num + 1);
+		return 0;
+	}
+}
+
+int Diem_Load(ifstream &filein, NodeDiemPtr &First) {
+
+	if (First != NULL) {
+		return 0;
+	}
+
+	Diem d;
+	while (1) {
+		int check = LoadDiem(filein, d);
+		insert_After(First, d);
+		if (check == 1) return 1;
+
+	}
+	filein.close();
+
+	return 0;
+}
+
+
+
+//--------Sinhvien------------//
+
+int LoadSV(ifstream &filein, SinhVien &sv) {
+
+	//ma sv
+	getline(filein, sv.maSV, ',');
+
+	//ma ho
+	getline(filein, sv.ho, ',');
+
+	//ma ten
+	getline(filein, sv.ten, ',');
+
+	//ma sv
+	string phai;
+	getline(filein, phai, ',');
+	if (phai == "0") {
+		sv.phai = nam;
+	}
+	else {
+		sv.phai = nu;
+	}
+
+	//sdt
+	getline(filein, sv.sdt, ',');
+
+	int num = filein.tellg();
+	string test;
+	getline(filein, test, '/');
+	if (test == "") {
+		getline(filein, test, '~');
+		if (test == "") {
+			return 1;
+		}
+		filein.seekg(num + 1);
+		return 2;
+	}
+	else {
+		// load diem
+		filein.seekg(num + 1);
+		int check = Diem_Load(filein, sv.firstD);
+		if (check == 1) return 1;
+	}
+	return 0;
+	_getch();
+	//filein.ignore(1);
+}
+
+void Sinhvien_Load(ifstream &filein, NodeSVPtr &First) {
+	SinhVien sv;
+
+	while (1) {
+		int check = LoadSV(filein, sv);
+		if (sv.maSV == "") {
+			break;
+		}
+		insert_First(First, sv);
+		if (check == 1) break;
+		//ThemcuoiSV(First, sv);
+	}
+	filein.close();
+
+	return;
+}
+//--------Lop------------//
+void LoadLop(ifstream &filein, LopPtr &lop) {
+
+	//ma lop
+	getline(filein, lop.Data.maLop, ',');
+
+	//ten lop
+	getline(filein, lop.Data.tenLop, ',');
+
+	//ma sv
+	string nam;
+	getline(filein, nam, ',');
+	lop.Data.namNhapHoc = atoi(nam.c_str());
+
+	// load sinh vien
+	Sinhvien_Load(filein, lop.dSSV);
+	string tam;
+	getline(filein, tam);
+
+}
+
+void Lop_Load(ListLop &list) {
+	ifstream filein;
+	LopPtr lop;
+	filein.open("dslop.txt", ios::in);
+
+	if (filein.fail() || !filein)
+	{
+		// file is empty 
+		return;
+	}
+	// clear list;
+
+	while (!filein.eof()) {
+		LoadLop(filein, lop);
+		if (lop.Data.maLop == "") {
+			break;
+		}
+		//insert_load_Lop(list, lop);
+		cout << "c-" + lop.Data.maLop + "-" + lop.dSSV[0].sV.maSV;
+		cout << "xong";
+		_getch();
+	}
+	filein.close();
+
+	return;
+}

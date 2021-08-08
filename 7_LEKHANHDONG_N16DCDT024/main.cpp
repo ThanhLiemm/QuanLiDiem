@@ -9,6 +9,13 @@ int main()
 	MonHocPtr tree;
 	Initialize(tree);
 	ListLop listlop;
+	//Lop lop;
+	//lop.maLop = "1234";
+	//lop.namNhapHoc = 2020;
+	//lop.tenLop = "D20CQCN020-N";
+	//insert_Lop(listlop, lop);
+	//Initialize(listlop.dSLop[0]->dSSV);
+	Monhoc_Load(tree);
 	while (true) {
 		menuChinh(tree, listlop);
 	}

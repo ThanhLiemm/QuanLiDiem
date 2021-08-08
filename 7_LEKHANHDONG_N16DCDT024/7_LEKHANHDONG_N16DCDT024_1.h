@@ -21,4 +21,15 @@ int menuLOP(MonHocPtr &tree);
 int menuMonHoc(MonHocPtr &tree);
 // menu chinh
 void menuChinh(MonHocPtr &tree, ListLop &listlop);
+// menu sv
+int menuSV(ListLop &listlop);
+// menu diem
+int menuDiem(ListLop &listlop,MonHocPtr &tree);
 
+//in 
+// in diem theo mon lan cua mot lop
+int inDiemLop(ListLop listlop, MonHocPtr root);
+// in diem trung binh cua tat ca sv trong lop
+int inDiemTB(ListLop listlop, MonHocPtr root);
+// in diem tat ca cac mon cua sv trong mo hop
+int inAll(ListLop listlop, MonHocPtr root);
