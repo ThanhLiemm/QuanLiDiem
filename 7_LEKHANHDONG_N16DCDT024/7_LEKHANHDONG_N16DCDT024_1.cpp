@@ -441,9 +441,12 @@ int menuSV(ListLop &listlop) {
 						sv.phai = nu;
 					else
 						sv.phai = nam;
-
-					cout << "Nhap vao sdt sv: ";
-					cin >> sv.sdt;
+					string number;
+					do {
+						cout << "Nhap vao sdt sv: ";
+						cin >> number;
+					} while (!checkNumber(number));
+					sv.sdt = number;
 
 					insert_First(lop->dSSV, sv);
 					Lop_Save(listlop);
@@ -566,8 +569,13 @@ int menuSV(ListLop &listlop) {
 						else
 							newSV.phai = nam;
 
-						cout << "Nhap vao sdt sv: ";
-						cin >> newSV.sdt;
+						string number;
+						do {
+							cout << "Nhap vao sdt sv: ";
+							cin >> number;
+						} while (!checkNumber(number));
+						newSV.sdt = number;
+
 						if (updateSV(listlop.dSLop[i]->dSSV, newSV) == 1) {
 							Lop_Save(listlop);
 							cout << "Update vien thanh cong! " << endl;
@@ -662,9 +670,12 @@ int menuDiem(ListLop &listlop, MonHocPtr &tree) {
 			getline(cin, maMH);
 			if (maMH == "") break;
 
-			unsigned int lan;
-			cout << "Nhap vao so lan thi: ";
-			cin >> lan;
+			string number;
+			do {
+				cout << "Nhap vao so lan thi: ";
+				cin >> number;
+			} while (!checkNumber(number));
+			unsigned int lan = stoi(number);
 			if (lan <= 0) break;
 			MonHocPtr monhoc = SearchMH(tree, maMH);
 			if (search_MaLop(listlop, malop) && monhoc)
@@ -674,14 +685,16 @@ int menuDiem(ListLop &listlop, MonHocPtr &tree) {
 				{
 					cout <<"Ma lop: "<<lop->Data.maLop << "\t" << "So Lan: "<<lan << "\t" << "Ma MH: " << monhoc->mh.maMH << endl;
 					for (NodeSVPtr p = lop->dSSV; p != NULL; p = p->next) {
-						cout << p->sV.maSV << "\t" << p->sV.ten << "\t" << "diem : ";
-						Diem d;
-						string diem;
-						cin >> diem;
-						std::string::size_type sz;
 						
+						Diem d;
+						std::string::size_type sz;
+						string number;
+						do {
+							cout << p->sV.maSV << "\t" << p->sV.ten << "\t" << "diem : ";
+							cin >> number;
+						} while (!checkFloat(number));
 						///them diem vao trong
-						d.diem = std::stof(diem, &sz);
+						d.diem = std::stof(number, &sz);
 						d.lan = lan;
 						d.maMH = monhoc->mh.maMH;
 
@@ -773,8 +786,12 @@ int menuDiem(ListLop &listlop, MonHocPtr &tree) {
 		}
 		cout << "Nhap vao ma mon hoc: ";
 		cin >> maMH;
-		cout << "Nhap lan thi: ";
-		cin >> lan;
+		string number;
+		do {
+			cout << "Nhap vao so lan thi: ";
+			cin >> number;
+		} while (!checkNumber(number));
+		lan = unsigned(stoi(number));
 		NodeDiemPtr d = search_Diem(sv->sV.firstD, maMH, lan);
 		if (d == NULL) {
 			cout << "Ma mon hoc hoac lan thi khong hop le! (press any key to exit)";
@@ -783,11 +800,12 @@ int menuDiem(ListLop &listlop, MonHocPtr &tree) {
 		}
 		cout << "Ma sv: " << sv->sV.maSV << "\t" << "Ten sv: " << sv->sV.ten << endl;
 		cout << "Ma mh:" << d->d.maMH << "\t" << "lan :" << d->d.lan << "\t" << "diem: " << d->d.diem << endl;
-		cout << "Nhap vao diem ban muon: ";
-		string diem;
-		cin >> diem;
+		do {
+			cout << "Nhap vao diem ban muon: ";
+			cin >> number;
+		} while (!checkFloat(number));
 		std::string::size_type sz;
-		d->d.diem = std::stof(diem, &sz);
+		d->d.diem = std::stof(number, &sz);
 		Lop_Save(listlop);
 		cout << "Update diem thanh cong! (press any key to quit)";
 		_getch();

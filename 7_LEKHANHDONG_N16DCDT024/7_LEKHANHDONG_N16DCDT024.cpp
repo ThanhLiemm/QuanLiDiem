@@ -226,6 +226,17 @@ int delete_maSV(NodeSVPtr &firstSV, string maSV) {
 		}
 	}
 }
+//get sv trong theo maSV
+NodeSVPtr getSV(ListLop listlop, string maSV) {
+	for (int i = 0; i < listlop.n; i++) {
+		NodeSVPtr first = listlop.dSLop[i]->dSSV;
+		NodeSVPtr p;
+		for (p = first; p != NULL; p = p->next) {
+			if (p->sV.maSV == maSV) return p;
+		}
+	}
+	return NULL;
+}
 
 //----------------------- Lop -------------------//
 //kiem tra co rong khong 
@@ -968,4 +979,20 @@ void Lop_Load(ListLop &list) {
 	filein.close();
 
 	return;
+}
+//check int 
+bool checkNumber(const string& str)
+{
+	for (char const &c : str) {
+		if (isdigit(c) == 0) return false;
+	}
+	return true;
+}
+//check float
+bool checkFloat(const string& str)
+{
+	for (char const &c : str) {
+		if (isdigit(c) == 0 && c != '.') return false;
+	}
+	return true;
 }

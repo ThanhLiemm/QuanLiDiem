@@ -225,4 +225,10 @@ void Sinhvien_Load(ifstream &filein, NodeSVPtr &First);
 void LoadLop(ifstream &filein, LopPtr &lop);
 void Lop_Load(ListLop &list);
 
+//check int 
+bool checkNumber(const string& str);
+//check float
+bool checkFloat(const string& str);
+
+
 
